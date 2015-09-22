@@ -13,15 +13,15 @@ class Vibed < Thor
   map "-v" => :version
 
   VERSION='0.0.1'
-  CONFIG_FILE="#{ENV['HOME']}/.vibed"
+  CONFIG_FILE="#{ENV['HOME']}/.config/vibed"
 
   desc 'version','Shows the version'
   def version
     puts "#{VERSION}\n"
   end
 
-  desc 'get','Search & Download a music file.'
-  def get
+  desc 'start','Search & Download a music file.'
+  def start
     load_config
     cache_cookie
     while true
@@ -35,10 +35,10 @@ class Vibed < Thor
     puts "Tell me the music name and author:\n"
     search_param = STDIN.gets.chomp.gsub(' ','_')
     
-    puts "Params: #{search_param}"
+    # puts "Params: #{search_param}"
     target_file = "#{@config['download_folder']}/#{search_param}.mp3"
     search_link = "http://vibeclouds.net/tracks/#{search_param}.html"
-    puts "Search link: #{search_link}"
+    # puts "Search link: #{search_link}"
 
     page_content = open(search_link, "Cookie" => @cookie_ref.meta['set-cookie'].split('; ',2)[0]).read
     results = page_content.scan(/location\.href='(.*)'/)
