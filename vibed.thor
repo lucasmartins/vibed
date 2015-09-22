@@ -23,15 +23,15 @@ class Vibed < Thor
   desc 'start','Search & Download a music file.'
   def start
     load_config
-    cache_cookie
+    cookie = cache_cookie
     while true
-      search_and_download
+      search_and_download(cookie)
     end
   end
 
   private
 
-  def search_and_download()
+  def search_and_download(cookie)
     puts "Tell me the music name and author:\n"
     search_param = STDIN.gets.chomp.gsub(' ','_')
     
@@ -40,24 +40,25 @@ class Vibed < Thor
     search_link = "http://vibeclouds.net/tracks/#{search_param}.html"
     # puts "Search link: #{search_link}"
 
-    page_content = open(search_link, "Cookie" => @cookie_ref.meta['set-cookie'].split('; ',2)[0]).read
+    page_content = open(search_link, "Cookie" => cookie.meta['set-cookie'].split('; ',2)[0]).read
     results = page_content.scan(/location\.href='(.*)'/)
 
     download_link = select_download_link(results)
-    download_file_to_target(download_link, target_file, @cookie_ref)
+    download_file_to_target(download_link, target_file, cookie)
   end
 
   def cache_cookie
     puts "Getting cookie..."
-    @cookie_ref = open("http://vibeclouds.net")
+    cookie_ref = open("http://vibeclouds.net")
     puts "OHM NOM NOM..."
+    cookie_ref
   end
 
-  def download_file_to_target(download_link, target_file, cookie_ref)
+  def download_file_to_target(download_link, target_file, cookie)
     File.delete(target_file) if File.exist?(target_file)
     f=File.new(target_file,'w')
     puts "Downloading #{download_link} into #{target_file}"
-    open(download_link, "Cookie" => cookie_ref.meta['set-cookie'].split('; ',2)[0]) do |uri|
+    open(download_link, "Cookie" => cookie.meta['set-cookie'].split('; ',2)[0]) do |uri|
       f.write(uri.read)
     end
     f.close
